@@ -80,3 +80,29 @@ console.log(JSON.stringify([
 ]));
 """)
     assert json.loads(out) == ["0分", "5分", "1時間", "1時間40分"]
+
+
+def test_compute_ring_color_endpoints():
+    """進捗の両端と中央で、青→黄→赤のグラデーション色になることを確認する。"""
+    out = _run_node("""
+import { computeRingColor } from './timer.js';
+console.log(JSON.stringify([
+    computeRingColor(0),
+    computeRingColor(0.5),
+    computeRingColor(1),
+]));
+""")
+    assert json.loads(out) == ["#4a90e2", "#f5c542", "#e24a4a"]
+
+
+def test_compute_ring_color_clamps_out_of_range():
+    """範囲外の入力や NaN を 0〜1 にクランプし、安全な色を返すことを確認する。"""
+    out = _run_node("""
+import { computeRingColor } from './timer.js';
+console.log(JSON.stringify([
+    computeRingColor(-0.5),
+    computeRingColor(1.5),
+    computeRingColor(Number.NaN),
+]));
+""")
+    assert json.loads(out) == ["#4a90e2", "#e24a4a", "#4a90e2"]

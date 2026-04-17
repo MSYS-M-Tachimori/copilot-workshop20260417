@@ -2,6 +2,7 @@ import { createInitialState, reducer } from "./state.js";
 import {
 	calculateProgressRatio,
 	calculateRemainingSeconds,
+	computeRingColor,
 	formatFocusedTime,
 	formatSeconds,
 } from "./timer.js";
@@ -176,7 +177,13 @@ function render() {
 
 	elements.todayCompleted.textContent = String(state.todayCompleted);
 	elements.todayFocused.textContent = formatFocusedTime(state.todayFocusedSeconds);
-	elements.timerRing.style.background = `conic-gradient(var(--accent) ${progressDeg}deg, var(--ring-rest) ${progressDeg}deg 360deg)`;
+
+	const ringColor = computeRingColor(progress);
+	elements.timerRing.style.setProperty("--ring-active", ringColor);
+	elements.timerRing.style.background = `conic-gradient(var(--ring-active) ${progressDeg}deg, var(--ring-rest) ${progressDeg}deg 360deg)`;
+
+	const isFocusing = state.status === "running" && state.mode === "work";
+	document.body.classList.toggle("is-focusing", isFocusing);
 
 	elements.resetBtn.disabled = state.status === "idle";
 }
