@@ -9,7 +9,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body data-theme="light">
 	<div class="page-bg">
 		<main class="app-shell" aria-live="polite">
 			<header class="app-header">
@@ -51,6 +51,47 @@
 					</div>
 				</div>
 			</section>
+
+			<details class="settings-card" aria-label="設定">
+				<summary>設定</summary>
+				<div class="settings-grid">
+					<label class="setting-row">
+						<span>作業時間</span>
+						<select id="work-minutes-select">
+							<option value="15">15分</option>
+							<option value="25" selected>25分</option>
+							<option value="35">35分</option>
+							<option value="45">45分</option>
+						</select>
+					</label>
+
+					<label class="setting-row">
+						<span>休憩時間</span>
+						<select id="break-minutes-select">
+							<option value="5" selected>5分</option>
+							<option value="10">10分</option>
+							<option value="15">15分</option>
+						</select>
+					</label>
+
+					<label class="setting-row">
+						<span>テーマ</span>
+						<select id="theme-select">
+							<option value="light" selected>ライト</option>
+							<option value="dark">ダーク</option>
+							<option value="focus">フォーカス</option>
+						</select>
+					</label>
+
+					<fieldset class="setting-row setting-sounds">
+						<legend>サウンド</legend>
+						<label><input type="checkbox" id="sound-start-toggle" checked> 開始音</label>
+						<label><input type="checkbox" id="sound-end-toggle" checked> 終了音</label>
+						<label><input type="checkbox" id="sound-tick-toggle"> tick音</label>
+					</fieldset>
+				</div>
+				<p class="settings-hint">タイマー実行中は時間変更が反映されません。</p>
+			</details>
 		</main>
 	</div>
 	<script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>

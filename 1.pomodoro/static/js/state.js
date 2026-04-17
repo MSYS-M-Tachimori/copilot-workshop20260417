@@ -1,19 +1,33 @@
-const WORK_SECONDS = 25 * 60;
-const BREAK_SECONDS = 5 * 60;
+const DEFAULT_WORK_SECONDS = 25 * 60;
+const DEFAULT_BREAK_SECONDS = 5 * 60;
 
-export function createInitialState() {
+export const ALLOWED_WORK_MINUTES = [15, 25, 35, 45];
+export const ALLOWED_BREAK_MINUTES = [5, 10, 15];
+
+export function createInitialState(overrides = {}) {
+	const workDurationSeconds =
+		typeof overrides.workDurationSeconds === "number"
+			? overrides.workDurationSeconds
+			: DEFAULT_WORK_SECONDS;
+	const breakDurationSeconds =
+		typeof overrides.breakDurationSeconds === "number"
+			? overrides.breakDurationSeconds
+			: DEFAULT_BREAK_SECONDS;
+
 	return {
 		mode: "work",
 		status: "idle",
-		sessionDurationSeconds: WORK_SECONDS,
-		remainingSeconds: WORK_SECONDS,
+		workDurationSeconds,
+		breakDurationSeconds,
+		sessionDurationSeconds: workDurationSeconds,
+		remainingSeconds: workDurationSeconds,
 		todayCompleted: 0,
 		todayFocusedSeconds: 0,
 	};
 }
 
-function durationForMode(mode) {
-	return mode === "work" ? WORK_SECONDS : BREAK_SECONDS;
+function durationForMode(state, mode) {
+	return mode === "work" ? state.workDurationSeconds : state.breakDurationSeconds;
 }
 
 export function reducer(state, event) {
@@ -52,7 +66,7 @@ export function reducer(state, event) {
 		}
 
 		case "RESET": {
-			const duration = durationForMode(state.mode);
+			const duration = durationForMode(state, state.mode);
 			return {
 				...state,
 				status: "idle",
@@ -80,10 +94,37 @@ export function reducer(state, event) {
 			}
 
 			const nextMode = state.mode === "work" ? "break" : "work";
-			const duration = durationForMode(nextMode);
+			const duration = durationForMode(state, nextMode);
 			return {
 				...state,
 				mode: nextMode,
+				status: "idle",
+				sessionDurationSeconds: duration,
+				remainingSeconds: duration,
+			};
+		}
+
+		case "UPDATE_DURATIONS": {
+			if (state.status === "running" || state.status === "paused") {
+				return state;
+			}
+
+			const nextWork =
+				typeof event.workDurationSeconds === "number"
+					? event.workDurationSeconds
+					: state.workDurationSeconds;
+			const nextBreak =
+				typeof event.breakDurationSeconds === "number"
+					? event.breakDurationSeconds
+					: state.breakDurationSeconds;
+			const next = {
+				...state,
+				workDurationSeconds: nextWork,
+				breakDurationSeconds: nextBreak,
+			};
+			const duration = durationForMode(next, next.mode);
+			return {
+				...next,
 				status: "idle",
 				sessionDurationSeconds: duration,
 				remainingSeconds: duration,
