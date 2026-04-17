@@ -1,6 +1,10 @@
 from flask import Flask, jsonify, render_template, request
 
-from pomodoro.application.use_cases import CompleteSession, GetTodayProgress
+from pomodoro.application.use_cases import (
+    CompleteSession,
+    GetGamificationStats,
+    GetTodayProgress,
+)
 from pomodoro.domain.clock import SystemClock
 from pomodoro.domain.models import CompleteSessionCommand
 from pomodoro.domain.services import SessionRepository
@@ -21,6 +25,7 @@ def create_app(repository: SessionRepository | None = None) -> Flask:
     clock = SystemClock()
     complete_session_uc = CompleteSession(repository)
     get_today_progress_uc = GetTodayProgress(repository, clock)
+    get_gamification_stats_uc = GetGamificationStats(repository, clock)
 
     @app.get("/")
     def index():
@@ -67,6 +72,10 @@ def create_app(repository: SessionRepository | None = None) -> Flask:
             "completed_sessions": progress.completed_sessions,
             "focused_seconds": progress.focused_seconds,
         }), 200
+
+    @app.get("/api/stats/gamification")
+    def gamification_stats():
+        return jsonify(get_gamification_stats_uc.execute_as_dict()), 200
 
     return app
 

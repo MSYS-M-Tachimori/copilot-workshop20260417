@@ -68,3 +68,25 @@ class TestSQLiteSessionRepository:
         repo.save(_make_record(started_at="2026-04-17T00:01:00+00:00"))
         progress = repo.get_today_progress(date(2026, 4, 17))
         assert progress.completed_sessions == 1
+
+    def test_get_daily_work_aggregates_empty(self, repo):
+        assert repo.get_daily_work_aggregates() == []
+
+    def test_get_daily_work_aggregates_groups_by_day(self, repo):
+        repo.save(_make_record(started_at="2026-04-15T09:00:00+00:00"))
+        repo.save(_make_record(started_at="2026-04-15T10:00:00+00:00"))
+        repo.save(_make_record(started_at="2026-04-17T10:00:00+00:00"))
+        # break セッションは集計対象外
+        repo.save(
+            _make_record(
+                session_type=SessionType.BREAK,
+                started_at="2026-04-17T11:00:00+00:00",
+                duration=300,
+            )
+        )
+        aggs = repo.get_daily_work_aggregates()
+        assert [a.date for a in aggs] == ["2026-04-15", "2026-04-17"]
+        assert aggs[0].completed_sessions == 2
+        assert aggs[0].focused_seconds == 3000
+        assert aggs[1].completed_sessions == 1
+        assert aggs[1].focused_seconds == 1500
