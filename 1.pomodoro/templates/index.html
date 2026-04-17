@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Pomodoro Timer</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+	<div class="page-bg">
+		<main class="app-shell" aria-live="polite">
+			<header class="app-header">
+				<h1 class="title">ポモドーロタイマー</h1>
+				<div class="window-controls" aria-hidden="true">
+					<span>−</span>
+					<span>□</span>
+					<span>×</span>
+				</div>
+			</header>
+
+			<p class="mode-text" id="mode-text">作業中</p>
+
+			<section class="timer-section">
+				<div class="timer-ring" id="timer-ring">
+					<div class="timer-core">
+						<p class="timer-value" id="timer-value">25:00</p>
+					</div>
+				</div>
+			</section>
+
+			<div class="controls">
+				<button class="btn btn-primary" id="start-btn" type="button">開始</button>
+				<button class="btn btn-outline" id="reset-btn" type="button">リセット</button>
+			</div>
+
+			<p class="hint" id="status-message">開始ボタンを押すとタイマーが動きます。</p>
+
+			<section class="progress-card" aria-label="今日の進捗">
+				<h2>今日の進捗</h2>
+				<div class="progress-grid">
+					<div>
+						<p class="progress-value" id="today-completed">0</p>
+						<p class="progress-label">完了</p>
+					</div>
+					<div>
+						<p class="progress-value" id="today-focused">0分</p>
+						<p class="progress-label">集中時間</p>
+					</div>
+				</div>
+			</section>
+		</main>
+	</div>
+	<script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
