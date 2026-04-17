@@ -134,3 +134,100 @@ console.log(JSON.stringify(s));
 """)
     assert out["mode"] == "work"
     assert out["status"] == "running"
+
+
+def test_initial_state_accepts_custom_durations():
+    out = _run_node("""
+import { createInitialState } from './state.js';
+const s = createInitialState({ workDurationSeconds: 15 * 60, breakDurationSeconds: 10 * 60 });
+console.log(JSON.stringify(s));
+""")
+    assert out["workDurationSeconds"] == 900
+    assert out["breakDurationSeconds"] == 600
+    assert out["sessionDurationSeconds"] == 900
+    assert out["remainingSeconds"] == 900
+
+
+def test_update_durations_resets_work_to_new_value_when_idle():
+    out = _run_node("""
+import { createInitialState, reducer } from './state.js';
+let s = createInitialState();
+s = reducer(s, { type: 'UPDATE_DURATIONS', workDurationSeconds: 45 * 60 });
+console.log(JSON.stringify(s));
+""")
+    assert out["workDurationSeconds"] == 2700
+    assert out["sessionDurationSeconds"] == 2700
+    assert out["remainingSeconds"] == 2700
+    assert out["status"] == "idle"
+
+
+def test_update_durations_only_break_keeps_current_work_duration():
+    out = _run_node("""
+import { createInitialState, reducer } from './state.js';
+let s = createInitialState();
+s = reducer(s, { type: 'UPDATE_DURATIONS', breakDurationSeconds: 15 * 60 });
+console.log(JSON.stringify(s));
+""")
+    assert out["workDurationSeconds"] == 1500
+    assert out["breakDurationSeconds"] == 900
+
+
+def test_update_durations_in_break_mode_reflects_new_break_duration():
+    out = _run_node("""
+import { createInitialState, reducer } from './state.js';
+let s = createInitialState();
+s = reducer(s, { type: 'SWITCH_MODE' });
+s = reducer(s, { type: 'UPDATE_DURATIONS', breakDurationSeconds: 10 * 60 });
+console.log(JSON.stringify(s));
+""")
+    assert out["mode"] == "break"
+    assert out["breakDurationSeconds"] == 600
+    assert out["sessionDurationSeconds"] == 600
+    assert out["remainingSeconds"] == 600
+
+
+def test_update_durations_blocked_while_running():
+    out = _run_node("""
+import { createInitialState, reducer } from './state.js';
+let s = reducer(createInitialState(), { type: 'START' });
+s = reducer(s, { type: 'UPDATE_DURATIONS', workDurationSeconds: 45 * 60 });
+console.log(JSON.stringify(s));
+""")
+    assert out["workDurationSeconds"] == 1500
+    assert out["status"] == "running"
+
+
+def test_update_durations_blocked_while_paused():
+    out = _run_node("""
+import { createInitialState, reducer } from './state.js';
+let s = reducer(createInitialState(), { type: 'START' });
+s = reducer(s, { type: 'PAUSE' });
+s = reducer(s, { type: 'UPDATE_DURATIONS', workDurationSeconds: 45 * 60 });
+console.log(JSON.stringify(s));
+""")
+    assert out["workDurationSeconds"] == 1500
+    assert out["status"] == "paused"
+
+
+def test_reset_respects_custom_work_duration():
+    out = _run_node("""
+import { createInitialState, reducer } from './state.js';
+let s = createInitialState({ workDurationSeconds: 35 * 60 });
+s = reducer(s, { type: 'START' });
+s = reducer(s, { type: 'TICK', remainingSeconds: 100 });
+s = reducer(s, { type: 'PAUSE' });
+s = reducer(s, { type: 'RESET' });
+console.log(JSON.stringify(s));
+""")
+    assert out["status"] == "idle"
+    assert out["remainingSeconds"] == 2100
+    assert out["sessionDurationSeconds"] == 2100
+
+
+def test_allowed_minutes_exported():
+    out = _run_node("""
+import { ALLOWED_WORK_MINUTES, ALLOWED_BREAK_MINUTES } from './state.js';
+console.log(JSON.stringify({ work: ALLOWED_WORK_MINUTES, brk: ALLOWED_BREAK_MINUTES }));
+""")
+    assert out["work"] == [15, 25, 35, 45]
+    assert out["brk"] == [5, 10, 15]
