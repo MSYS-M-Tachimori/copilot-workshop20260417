@@ -4,6 +4,7 @@ import sqlite3
 from datetime import date
 
 from pomodoro.domain.models import (
+    DailyAggregate,
     DurationSeconds,
     SessionRecord,
     SessionType,
@@ -52,3 +53,26 @@ class SQLiteSessionRepository(SessionRepository):
             completed_sessions=row["completed_sessions"],
             focused_seconds=row["focused_seconds"],
         )
+
+    def get_daily_work_aggregates(self) -> list[DailyAggregate]:
+        rows = self._conn.execute(
+            """
+            SELECT
+                date(started_at) AS day,
+                COUNT(*) AS completed_sessions,
+                COALESCE(SUM(duration_seconds), 0) AS focused_seconds
+            FROM sessions
+            WHERE completed = 1
+              AND session_type = 'work'
+            GROUP BY date(started_at)
+            ORDER BY date(started_at) ASC
+            """
+        ).fetchall()
+        return [
+            DailyAggregate(
+                date=row["day"],
+                completed_sessions=row["completed_sessions"],
+                focused_seconds=row["focused_seconds"],
+            )
+            for row in rows
+        ]

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from pomodoro.domain.models import SessionRecord, TodayProgress
+from pomodoro.domain.models import DailyAggregate, SessionRecord, TodayProgress
 from pomodoro.domain.services import SessionRepository
 
 
@@ -26,3 +26,20 @@ class InMemorySessionRepository(SessionRepository):
                     completed += 1
                     focused += r.duration_seconds.value
         return TodayProgress(completed_sessions=completed, focused_seconds=focused)
+
+    def get_daily_work_aggregates(self) -> list[DailyAggregate]:
+        buckets: dict[str, tuple[int, int]] = {}
+        for r in self._records:
+            if not r.completed or r.session_type.value != "work":
+                continue
+            key = r.started_at.date().isoformat()
+            sessions, focused = buckets.get(key, (0, 0))
+            buckets[key] = (sessions + 1, focused + r.duration_seconds.value)
+        return [
+            DailyAggregate(
+                date=day,
+                completed_sessions=sessions,
+                focused_seconds=focused,
+            )
+            for day, (sessions, focused) in sorted(buckets.items())
+        ]

@@ -51,6 +51,49 @@
 					</div>
 				</div>
 			</section>
+
+			<section class="gamification-card" aria-label="ゲーミフィケーション">
+				<h2>あなたの記録</h2>
+
+				<div class="level-block">
+					<div class="level-header">
+						<span class="level-label">レベル <span id="gami-level">1</span></span>
+						<span class="level-xp"><span id="gami-xp-in-level">0</span> / <span id="gami-xp-per-level">100</span> XP</span>
+					</div>
+					<div class="level-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="gami-level-bar">
+						<div class="level-bar-fill" id="gami-level-fill"></div>
+					</div>
+					<p class="level-total">累計 XP: <span id="gami-xp-total">0</span></p>
+				</div>
+
+				<div class="streak-block" aria-label="連続記録">
+					<span class="streak-icon" aria-hidden="true">🔥</span>
+					<span class="streak-number" id="gami-streak">0</span>
+					<span class="streak-label">日連続</span>
+				</div>
+
+				<div class="stats-block">
+					<div class="stats-summary">
+						<div>
+							<p class="stats-value" id="gami-weekly-sessions">0</p>
+							<p class="stats-label">今週の完了</p>
+						</div>
+						<div>
+							<p class="stats-value" id="gami-monthly-sessions">0</p>
+							<p class="stats-label">今月の完了</p>
+						</div>
+					</div>
+					<div class="stats-chart-wrap">
+						<p class="stats-chart-title">直近 7 日間</p>
+						<div class="stats-chart" id="gami-weekly-chart" aria-label="直近 7 日間の完了数グラフ"></div>
+					</div>
+				</div>
+
+				<div class="badges-block">
+					<h3 class="badges-title">達成バッジ</h3>
+					<ul class="badges-list" id="gami-badges"></ul>
+				</div>
+			</section>
 		</main>
 	</div>
 	<script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>

@@ -5,11 +5,17 @@ import {
 	formatFocusedTime,
 	formatSeconds,
 } from "./timer.js";
+import {
+	chartBarHeights,
+	formatDayLabel,
+	levelProgressPercent,
+} from "./gamification.js";
 
 let state = createInitialState();
 let timerIntervalId = null;
 let endTimeMs = null;
 let sessionStartedAt = null;
+let gamification = null;
 
 const elements = {
 	modeText: document.getElementById("mode-text"),
@@ -20,6 +26,17 @@ const elements = {
 	statusMessage: document.getElementById("status-message"),
 	todayCompleted: document.getElementById("today-completed"),
 	todayFocused: document.getElementById("today-focused"),
+	gamiLevel: document.getElementById("gami-level"),
+	gamiXpInLevel: document.getElementById("gami-xp-in-level"),
+	gamiXpPerLevel: document.getElementById("gami-xp-per-level"),
+	gamiXpTotal: document.getElementById("gami-xp-total"),
+	gamiLevelBar: document.getElementById("gami-level-bar"),
+	gamiLevelFill: document.getElementById("gami-level-fill"),
+	gamiStreak: document.getElementById("gami-streak"),
+	gamiWeeklySessions: document.getElementById("gami-weekly-sessions"),
+	gamiMonthlySessions: document.getElementById("gami-monthly-sessions"),
+	gamiWeeklyChart: document.getElementById("gami-weekly-chart"),
+	gamiBadges: document.getElementById("gami-badges"),
 };
 
 function updateState(event) {
@@ -74,6 +91,7 @@ async function reportCompletion() {
 			showError("セッションの保存に失敗しました。");
 		}
 		await fetchTodayProgress();
+		await fetchGamification();
 	} catch {
 		showError("サーバーとの通信に失敗しました。");
 	}
@@ -94,6 +112,19 @@ async function fetchTodayProgress() {
 		render();
 	} catch {
 		// ignore – progress will be fetched on next opportunity
+	}
+}
+
+async function fetchGamification() {
+	try {
+		const resp = await fetch("/api/stats/gamification");
+		if (!resp.ok) {
+			return;
+		}
+		gamification = await resp.json();
+		renderGamification();
+	} catch {
+		// ignore – will refresh on next completion
 	}
 }
 
@@ -181,6 +212,67 @@ function render() {
 	elements.resetBtn.disabled = state.status === "idle";
 }
 
+function renderGamification() {
+	if (!gamification || !elements.gamiLevel) {
+		return;
+	}
+
+	const xpPerLevel = gamification.xp_in_level + gamification.xp_to_next_level;
+	elements.gamiLevel.textContent = String(gamification.level);
+	elements.gamiXpInLevel.textContent = String(gamification.xp_in_level);
+	elements.gamiXpPerLevel.textContent = String(xpPerLevel);
+	elements.gamiXpTotal.textContent = String(gamification.xp);
+
+	const pct = levelProgressPercent(gamification.xp_in_level, xpPerLevel);
+	elements.gamiLevelFill.style.width = `${pct}%`;
+	elements.gamiLevelBar.setAttribute("aria-valuenow", String(Math.round(pct)));
+
+	elements.gamiStreak.textContent = String(gamification.streak_days);
+	elements.gamiWeeklySessions.textContent = String(gamification.weekly_total_sessions);
+	elements.gamiMonthlySessions.textContent = String(gamification.monthly_total_sessions);
+
+	const heights = chartBarHeights(gamification.weekly);
+	elements.gamiWeeklyChart.innerHTML = "";
+	gamification.weekly.forEach((day, idx) => {
+		const bar = document.createElement("div");
+		bar.className = "chart-bar";
+		const fill = document.createElement("div");
+		fill.className = "chart-bar-fill";
+		fill.style.height = `${heights[idx]}%`;
+		if ((day.completed_sessions || 0) > 0) {
+			fill.classList.add("has-sessions");
+		}
+		const label = document.createElement("span");
+		label.className = "chart-bar-label";
+		label.textContent = formatDayLabel(day.date);
+		const count = document.createElement("span");
+		count.className = "chart-bar-count";
+		count.textContent = String(day.completed_sessions || 0);
+		bar.title = `${day.date}: ${day.completed_sessions}件`;
+		bar.appendChild(count);
+		bar.appendChild(fill);
+		bar.appendChild(label);
+		elements.gamiWeeklyChart.appendChild(bar);
+	});
+
+	elements.gamiBadges.innerHTML = "";
+	gamification.badges.forEach((badge) => {
+		const li = document.createElement("li");
+		li.className = badge.achieved ? "badge badge-achieved" : "badge badge-locked";
+		li.title = badge.description;
+		const icon = document.createElement("span");
+		icon.className = "badge-icon";
+		icon.setAttribute("aria-hidden", "true");
+		icon.textContent = badge.achieved ? "🏅" : "🔒";
+		const name = document.createElement("span");
+		name.className = "badge-name";
+		name.textContent = badge.name;
+		li.appendChild(icon);
+		li.appendChild(name);
+		elements.gamiBadges.appendChild(li);
+	});
+}
+
 elements.startBtn.addEventListener("click", startOrPauseTimer);
 elements.resetBtn.addEventListener("click", resetTimer);
 
@@ -192,7 +284,9 @@ document.addEventListener("visibilitychange", () => {
 });
 
 fetchTodayProgress();
+fetchGamification();
 render();
+renderGamification();
 
 document.addEventListener("visibilitychange", () => {
 	if (document.hidden || state.status !== "running" || endTimeMs === null) {

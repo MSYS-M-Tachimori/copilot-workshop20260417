@@ -56,3 +56,40 @@ class CompleteSessionCommand:
 class TodayProgress:
     completed_sessions: int
     focused_seconds: int
+
+
+@dataclass(frozen=True)
+class DailyAggregate:
+    """完了した作業セッションの日別集計。"""
+
+    date: str  # ISO 形式 YYYY-MM-DD
+    completed_sessions: int
+    focused_seconds: int
+
+
+@dataclass(frozen=True)
+class Badge:
+    id: str
+    name: str
+    description: str
+    achieved: bool
+
+
+@dataclass(frozen=True)
+class GamificationStats:
+    """ゲーミフィケーション表示に必要な全情報。"""
+
+    xp: int
+    level: int
+    xp_in_level: int
+    xp_to_next_level: int
+    streak_days: int
+    total_sessions: int
+    total_focused_seconds: int
+    weekly: list[DailyAggregate]
+    monthly: list[DailyAggregate]
+    weekly_total_sessions: int
+    weekly_total_focused_seconds: int
+    monthly_total_sessions: int
+    monthly_total_focused_seconds: int
+    badges: list[Badge]

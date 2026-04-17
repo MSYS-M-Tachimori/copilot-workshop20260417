@@ -176,6 +176,210 @@ body {
 	color: #4f5363;
 }
 
+/* ===== ゲーミフィケーション ===== */
+.gamification-card {
+	margin-top: 18px;
+	padding: 18px 16px 16px;
+	border-radius: 14px;
+	background: var(--panel-soft);
+}
+
+.gamification-card h2 {
+	margin: 0 0 12px;
+	font-size: 1.25rem;
+}
+
+.level-block {
+	margin-bottom: 14px;
+}
+
+.level-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 6px;
+	font-weight: 600;
+}
+
+.level-label {
+	color: var(--accent-strong);
+	font-size: 1.05rem;
+}
+
+.level-xp {
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+.level-bar {
+	height: 10px;
+	border-radius: 999px;
+	background: #cfd2de;
+	overflow: hidden;
+}
+
+.level-bar-fill {
+	height: 100%;
+	width: 0%;
+	background: linear-gradient(90deg, #7a83f2 0%, var(--accent-strong) 100%);
+	transition: width 300ms ease;
+}
+
+.level-total {
+	margin: 6px 0 0;
+	color: var(--muted);
+	font-size: 0.8rem;
+	text-align: right;
+}
+
+.streak-block {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 14px 0;
+	padding: 10px 12px;
+	border-radius: 10px;
+	background: #fff2e0;
+	color: #a14a00;
+}
+
+.streak-icon {
+	font-size: 1.4rem;
+}
+
+.streak-number {
+	font-size: 1.8rem;
+	font-weight: 800;
+	color: #d46a00;
+}
+
+.streak-label {
+	font-weight: 600;
+}
+
+.stats-block {
+	margin-bottom: 14px;
+}
+
+.stats-summary {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+.stats-value {
+	margin: 0;
+	color: var(--accent-strong);
+	font-size: 1.6rem;
+	font-weight: 700;
+}
+
+.stats-label {
+	margin: 0;
+	color: #4f5363;
+	font-size: 0.85rem;
+}
+
+.stats-chart-wrap {
+	padding: 8px 4px 4px;
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.5);
+}
+
+.stats-chart-title {
+	margin: 0 0 6px;
+	font-size: 0.85rem;
+	color: var(--muted);
+	text-align: center;
+}
+
+.stats-chart {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	gap: 4px;
+	align-items: end;
+	height: 90px;
+}
+
+.chart-bar {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	height: 100%;
+	gap: 2px;
+}
+
+.chart-bar-count {
+	font-size: 0.7rem;
+	color: var(--muted);
+	line-height: 1;
+	min-height: 0.9em;
+}
+
+.chart-bar-fill {
+	width: 70%;
+	min-height: 2px;
+	background: #cfd2de;
+	border-radius: 4px 4px 0 0;
+	transition: height 300ms ease;
+}
+
+.chart-bar-fill.has-sessions {
+	background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+}
+
+.chart-bar-label {
+	font-size: 0.7rem;
+	color: var(--muted);
+	line-height: 1;
+}
+
+.badges-block {
+	margin-top: 4px;
+}
+
+.badges-title {
+	margin: 0 0 8px;
+	font-size: 1rem;
+	color: var(--text);
+}
+
+.badges-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 6px;
+}
+
+.badge {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 8px;
+	border-radius: 8px;
+	font-size: 0.85rem;
+}
+
+.badge-achieved {
+	background: #fff7d6;
+	color: #7a5a00;
+	font-weight: 600;
+}
+
+.badge-locked {
+	background: rgba(255, 255, 255, 0.4);
+	color: var(--muted);
+}
+
+.badge-icon {
+	font-size: 1rem;
+}
+
 @media (max-width: 480px) {
 	.app-shell {
 		padding: 24px 16px 22px;
