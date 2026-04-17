@@ -22,6 +22,7 @@ body {
 }
 
 .page-bg {
+	position: relative;
 	min-height: 100vh;
 	display: grid;
 	place-items: center;
@@ -29,9 +30,71 @@ body {
 	background:
 		radial-gradient(420px 280px at 10% 85%, rgba(255, 255, 255, 0.1), transparent 65%),
 		linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+	overflow: hidden;
+}
+
+/* 集中時間中のみ表示される波紋アニメーション */
+.focus-ripples {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 600ms ease;
+	z-index: 0;
+}
+
+body.is-focusing .focus-ripples {
+	opacity: 1;
+}
+
+.focus-ripples .ripple {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 120px;
+	height: 120px;
+	margin: -60px 0 0 -60px;
+	border-radius: 50%;
+	border: 2px solid rgba(255, 255, 255, 0.35);
+	transform: scale(0.2);
+	opacity: 0;
+}
+
+body.is-focusing .focus-ripples .ripple {
+	animation: ripple-expand 4.5s ease-out infinite;
+}
+
+body.is-focusing .focus-ripples .ripple:nth-child(2) {
+	animation-delay: 1.5s;
+}
+
+body.is-focusing .focus-ripples .ripple:nth-child(3) {
+	animation-delay: 3s;
+}
+
+@keyframes ripple-expand {
+	0% {
+		transform: scale(0.2);
+		opacity: 0;
+	}
+	20% {
+		opacity: 0.55;
+	}
+	100% {
+		transform: scale(6);
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	body.is-focusing .focus-ripples .ripple {
+		animation: none;
+	}
 }
 
 .app-shell {
+	position: relative;
+	z-index: 1;
 	width: min(100%, 400px);
 	border-radius: 22px;
 	padding: 28px 20px 26px;
@@ -80,8 +143,9 @@ body {
 	border-radius: 999px;
 	display: grid;
 	place-items: center;
-	background: conic-gradient(var(--accent) 0deg, var(--ring-rest) 0deg 360deg);
-	transition: background 180ms linear;
+	--ring-active: var(--accent);
+	background: conic-gradient(var(--ring-active) 0deg, var(--ring-rest) 0deg 360deg);
+	transition: background 400ms ease-out;
 }
 
 .timer-core {
